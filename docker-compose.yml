@@ -1,0 +1,45 @@
+networks:
+  pnd-network:
+
+services:
+  pnd-game-service:
+    image: ffly3r/pnd-game-service:0.0.15-amd64
+    ports:
+      - 8081:8081
+    networks:
+      - pnd-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - DATASOURCE_URL=jdbc:postgresql://pnd-postgres:5432/postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pgsqlpass
+    healthcheck:
+      test: "curl --fail --silent localhost:8081/actuator/health | grep UP || exit 1"
+      interval: 2s
+      timeout: 1s
+      retries: 10
+      start_period: 2s
+    depends_on:
+      pnd-postgres:
+        condition: service_healthy
+
+  pnd-postgres:
+    image: postgres
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - pnd-network
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pgsqlpass
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  db-data:
