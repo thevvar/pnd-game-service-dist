@@ -3,7 +3,7 @@ networks:
 
 services:
   pnd-game-service:
-    image: ffly3r/pnd-game-service:0.0.23-amd64
+    image: ffly3r/pnd-game-service:0.0.24-amd64
     ports:
       - 8081:8081
     networks:
